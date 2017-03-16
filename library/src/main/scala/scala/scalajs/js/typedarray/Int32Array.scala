@@ -1,11 +1,13 @@
 package scala.scalajs.js.typedarray
 
 import scala.scalajs.js
+import scala.scalajs.js.annotation._
 
 /** <span class="badge badge-ecma6" style="float: right;">ECMAScript 6</span>
  *  A [[TypedArray]] of signed 32-bit integers
  */
 @js.native
+@JSGlobal
 class Int32Array private extends TypedArray[Int, Int32Array] {
 
   /** Constructs a Int32Array with the given length. Initialized to all 0 */
@@ -18,7 +20,7 @@ class Int32Array private extends TypedArray[Int, Int32Array] {
   def this(typedArray: TypedArray[_, _]) = this()
 
   /** Creates a new Int32Array with the elements in the given array */
-  def this(array: js.Array[_]) = this()
+  def this(array: js.Iterable[_]) = this()
 
   /** Creates a Int32Array view on the given ArrayBuffer */
   def this(buffer: ArrayBuffer, byteOffset: Int = 0, length: Int = ???) = this()
@@ -29,4 +31,5 @@ class Int32Array private extends TypedArray[Int, Int32Array] {
  *  [[Int32Array]] companion
  */
 @js.native
+@JSGlobal
 object Int32Array extends TypedArrayStatic

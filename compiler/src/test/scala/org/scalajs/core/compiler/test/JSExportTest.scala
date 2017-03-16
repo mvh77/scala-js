@@ -8,7 +8,7 @@ import org.junit.Test
 class JSExportTest extends DirectTest with TestHelpers {
 
   override def extraArgs: List[String] =
-    super.extraArgs :+ "-deprecation"
+    super.extraArgs ::: List("-deprecation", "-P:scalajs:suppressExportDeprecations")
 
   override def preamble: String =
     """import scala.scalajs.js, js.annotation._
@@ -577,6 +577,7 @@ class JSExportTest extends DirectTest with TestHelpers {
 
     @JSExport
     @js.native
+    @JSGlobal("Dummy")
     object A extends js.Object
     """ hasErrors
     """
@@ -603,6 +604,7 @@ class JSExportTest extends DirectTest with TestHelpers {
 
     @JSExport
     @js.native
+    @JSGlobal("Dummy")
     class A extends js.Object {
       @JSExport
       def this(x: Int) = this()
@@ -612,7 +614,7 @@ class JSExportTest extends DirectTest with TestHelpers {
       |newSource1.scala:5: error: You may not export a native JS class or object
       |    @JSExport
       |     ^
-      |newSource1.scala:8: error: You may not export a constructor of a subclass of js.Any
+      |newSource1.scala:9: error: You may not export a constructor of a subclass of js.Any
       |      @JSExport
       |       ^
     """
@@ -626,13 +628,14 @@ class JSExportTest extends DirectTest with TestHelpers {
     import scala.scalajs.js
 
     @js.native
+    @JSGlobal("Dummy")
     class A extends js.Object {
       @JSExport
       def foo: Int = js.native
     }
     """ hasErrors
     """
-      |newSource1.scala:7: error: You may not export a method of a subclass of js.Any
+      |newSource1.scala:8: error: You may not export a method of a subclass of js.Any
       |      @JSExport
       |       ^
     """
@@ -1724,13 +1727,14 @@ class JSExportTest extends DirectTest with TestHelpers {
     class StaticContainer extends js.Object
 
     @js.native
+    @JSGlobal("Dummy")
     object StaticContainer extends js.Object {
       @JSExportStatic
       def a(): Unit = js.native
     }
     """ hasErrors
     """
-      |newSource1.scala:8: error: You may not export a method of a subclass of js.Any
+      |newSource1.scala:9: error: You may not export a method of a subclass of js.Any
       |      @JSExportStatic
       |       ^
     """
@@ -1769,6 +1773,7 @@ class JSExportTest extends DirectTest with TestHelpers {
 
     """
     @js.native
+    @JSGlobal("Dummy")
     class StaticContainer extends js.Object
 
     object StaticContainer {
@@ -1777,9 +1782,83 @@ class JSExportTest extends DirectTest with TestHelpers {
     }
     """ hasErrors
     """
-      |newSource1.scala:7: error: Only a static object whose companion class is a Scala.js-defined JS class may export its members as static.
+      |newSource1.scala:8: error: Only a static object whose companion class is a Scala.js-defined JS class may export its members as static.
       |      @JSExportStatic
       |       ^
     """
+  }
+
+  @Test
+  def noExportStaticFieldAfterStatOrNonStaticField: Unit = {
+    for {
+      offendingDecl <- Seq(
+          "val a: Int = 1",
+          "var a: Int = 1",
+          """println("foo")"""
+      )
+    }
+    s"""
+    @ScalaJSDefined
+    class StaticContainer extends js.Object
+
+    object StaticContainer {
+      $offendingDecl
+
+      @JSExportStatic
+      val b: Int = 1
+
+      @JSExportStatic
+      var c: Int = 1
+
+      @JSExportStatic
+      def d: Int = 1
+
+      @JSExportStatic
+      def d_=(v: Int): Unit = ()
+
+      @JSExportStatic
+      def e(): Int = 1
+    }
+    """ hasErrors
+    """
+      |newSource1.scala:10: error: @JSExportStatic vals and vars must be defined before any other val/var, and before any constructor statement.
+      |      val b: Int = 1
+      |          ^
+      |newSource1.scala:13: error: @JSExportStatic vals and vars must be defined before any other val/var, and before any constructor statement.
+      |      var c: Int = 1
+      |          ^
+    """
+
+    for {
+      validDecl <- Seq(
+          "@JSExportStatic val a: Int = 1",
+          "@JSExportStatic var a: Int = 1",
+          "lazy val a: Int = 1",
+          "def a: Int = 1",
+          "def a_=(v: Int): Unit = ()",
+          "def a(): Int = 1",
+          "@JSExportStatic def a: Int = 1",
+          "@JSExportStatic def a_=(v: Int): Unit = ()",
+          "@JSExportStatic def a(): Int = 1",
+          "class A",
+          "object A",
+          "trait A",
+          "type A = Int"
+      )
+    }
+    s"""
+    @ScalaJSDefined
+    class StaticContainer extends js.Object
+
+    object StaticContainer {
+      $validDecl
+
+      @JSExportStatic
+      val b: Int = 1
+
+      @JSExportStatic
+      var c: Int = 1
+    }
+    """.succeeds
   }
 }

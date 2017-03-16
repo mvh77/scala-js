@@ -78,52 +78,50 @@ object BinaryIncompatibilities {
           "org.scalajs.core.tools.linker.backend.closure.ClosureAstTransformer.transformString"),
 
       // private[emitter], not an issue
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.ScalaJSClassEmitter.genAddToPrototype"),
-      ProblemFilters.exclude[MissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.ScalaJSClassEmitter.genClass"),
-      ProblemFilters.exclude[MissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.ScalaJSClassEmitter.genClassDef"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.ScalaJSClassEmitter.genPropertyName"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.ScalaJSClassEmitter.genTopLevelExportDef"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.ScalaJSClassEmitter.outputMode"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.ScalaJSClassEmitter.semantics"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.genCallHelper"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.genLet"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.genRawJSClassConstructor"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.genEmptyMutableLet"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.desugarTree"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.genLoadJSFromSpec"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.encodeClassVar"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.desugarToFunction"),
-      ProblemFilters.exclude[IncompatibleMethTypeProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.desugarToFunction"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.envField"),
-      ProblemFilters.exclude[IncompatibleMethTypeProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.envFieldDef"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.genIsInstanceOf"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring.this"),
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring#JSDesugar.this"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.ScalaJSClassEmitter$"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.ScalaJSClassEmitter"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$DesugarException"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$MyTreeOps"),
 
-      // private, not an issue.
-      ProblemFilters.exclude[DirectMissingMethodProblem](
-          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring#Env.this")
+      // private, not an issue
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$JSDesugar"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$JSDesugar$RecordFieldVarRef$"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$JSDesugar$RecordVarRef$"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$JSDesugar$RecordAwareEnv"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$Lhs"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$Lhs$"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$Lhs$Assign"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$Lhs$Assign$"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$Lhs$Return"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$Lhs$Return$"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$Lhs$Discard$"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$Lhs$VarDef$"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$Lhs$VarDef"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$Env"),
+      ProblemFilters.exclude[MissingClassProblem](
+          "org.scalajs.core.tools.linker.backend.emitter.JSDesugaring$Env$")
   )
 
   val JSEnvs = Seq(
@@ -151,6 +149,55 @@ object BinaryIncompatibilities {
           "scala.scalajs.js.Promise.race"),
       ProblemFilters.exclude[IncompatibleMethTypeProblem](
           "scala.scalajs.js.Promise.all"),
+
+      // js.Iterable support in TypedArray.
+      // Not a compatibility issue (due to JS land).
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Int8Array.set"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Int8Array.this"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Uint8ClampedArray.set"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Uint8ClampedArray.this"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Uint16Array.set"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Uint16Array.this"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Uint8Array.set"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Uint8Array.this"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.TypedArray.set"),
+      ProblemFilters.exclude[DirectMissingMethodProblem](
+          "scala.scalajs.js.typedarray.TypedArray.set"),
+      ProblemFilters.exclude[ReversedMissingMethodProblem](
+          "scala.scalajs.js.typedarray.TypedArray.set"),
+      ProblemFilters.exclude[ReversedMissingMethodProblem](
+          "scala.scalajs.js.typedarray.TypedArray.jsIterator"),
+      ProblemFilters.exclude[InheritedNewAbstractMethodProblem](
+          "scala.scalajs.js.Iterable.jsIterator"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Int32Array.set"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Int32Array.this"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Float32Array.set"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Float32Array.this"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Float64Array.set"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Float64Array.this"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Int16Array.set"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Int16Array.this"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Uint32Array.set"),
+      ProblemFilters.exclude[IncompatibleMethTypeProblem](
+          "scala.scalajs.js.typedarray.Uint32Array.this"),
 
       // New member in non-sealed trait (for low prio implicits).
       // Theoretically breaking.

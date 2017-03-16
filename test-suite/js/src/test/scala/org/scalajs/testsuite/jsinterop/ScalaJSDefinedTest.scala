@@ -296,6 +296,35 @@ class ScalaJSDefinedTest {
     assertFalse((inner2: AnyRef) eq inner1)
   }
 
+  // #2772
+  @Test def Scala_object_nested_inside_a_Scala_js_defined_JS_class_JSName(): Unit = {
+    @ScalaJSDefined
+    class Foo extends js.Object {
+      var innerInitCount: Int = _
+
+      @JSName("innerName")
+      object Inner {
+        innerInitCount += 1
+      }
+    }
+
+    val foo = new Foo
+    assertEquals(0, foo.innerInitCount)
+    val inner1 = foo.Inner
+    assertEquals(1, foo.innerInitCount)
+    assertTrue((foo.Inner: AnyRef) eq inner1)
+    assertEquals(1, foo.innerInitCount)
+
+    val dyn = (new Foo).asInstanceOf[js.Dynamic]
+    assertEquals(0, dyn.innerInitCount)
+    val inner2 = dyn.innerName
+    assertEquals(1, dyn.innerInitCount)
+    assertTrue((dyn.innerName: AnyRef) eq inner2)
+    assertEquals(1, dyn.innerInitCount)
+
+    assertFalse((inner2: AnyRef) eq inner1)
+  }
+
   @Test def anonymous_class_with_captures(): Unit = {
     val x = (() => 5)()
     val obj = new js.Object {
@@ -1543,7 +1572,7 @@ class ScalaJSDefinedTest {
 object ScalaJSDefinedTest {
 
   // Defined in test-suite/src/test/resources/ScalaJSDefinedTestNatives.js
-  @JSName("ScalaJSDefinedTestNativeParentClass")
+  @JSGlobal("ScalaJSDefinedTestNativeParentClass")
   @js.native
   class NativeParentClass(val x: Int) extends js.Object {
     def foo(s: String): String = js.native
@@ -1566,7 +1595,7 @@ object ScalaJSDefinedTest {
   }
 
   // Defined in test-suite/src/test/resources/ScalaJSDefinedTestNatives.js
-  @JSName("ScalaJSDefinedTestNativeParentClassWithDeferred")
+  @JSGlobal("ScalaJSDefinedTestNativeParentClassWithDeferred")
   @js.native
   abstract class NativeParentClassWithDeferred extends NativeTraitWithDeferred {
     def foo(y: Int): Int = js.native // = bar(y + 4) + x
@@ -1575,7 +1604,7 @@ object ScalaJSDefinedTest {
   }
 
   // Defined in test-suite/src/test/resources/ScalaJSDefinedTestNatives.js
-  @JSName("ScalaJSDefinedTestNativeParentClassWithVarargs")
+  @JSGlobal("ScalaJSDefinedTestNativeParentClassWithVarargs")
   @js.native
   class NativeParentClassWithVarargs(
       _x: Int, _args: Int*) extends js.Object {
@@ -1660,25 +1689,25 @@ object ScalaJSDefinedTest {
   object ConstructorDefaultParamScalaJSNonNative extends js.Object
 
   @js.native
-  @JSName("ConstructorDefaultParam")
+  @JSGlobal("ConstructorDefaultParam")
   class ConstructorDefaultParamJSNativeNone(val foo: Int = -1) extends js.Object
 
   @js.native
-  @JSName("ConstructorDefaultParam")
+  @JSGlobal("ConstructorDefaultParam")
   class ConstructorDefaultParamJSNativeScala(val foo: Int = -1) extends js.Object
   object ConstructorDefaultParamJSNativeScala
 
   @js.native
-  @JSName("ConstructorDefaultParam")
+  @JSGlobal("ConstructorDefaultParam")
   class ConstructorDefaultParamJSNativeJSNonNative(val foo: Int = -1) extends js.Object
   @ScalaJSDefined
   object ConstructorDefaultParamJSNativeJSNonNative extends js.Object
 
   @js.native
-  @JSName("ConstructorDefaultParam")
+  @JSGlobal("ConstructorDefaultParam")
   class ConstructorDefaultParamJSNativeJSNative(val foo: Int = -1) extends js.Object
   @js.native
-  @JSName("ConstructorDefaultParam")
+  @JSGlobal("ConstructorDefaultParam")
   object ConstructorDefaultParamJSNativeJSNative extends js.Object
 
   // sanity check

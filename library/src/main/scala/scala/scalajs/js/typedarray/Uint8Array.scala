@@ -1,11 +1,13 @@
 package scala.scalajs.js.typedarray
 
 import scala.scalajs.js
+import scala.scalajs.js.annotation._
 
 /** <span class="badge badge-ecma6" style="float: right;">ECMAScript 6</span>
  *  A [[TypedArray]] of unsigned 8-bit integers
  */
 @js.native
+@JSGlobal
 class Uint8Array private extends TypedArray[Short, Uint8Array] {
 
   /** Constructs a Uint8Array with the given length. Initialized to all 0 */
@@ -18,7 +20,7 @@ class Uint8Array private extends TypedArray[Short, Uint8Array] {
   def this(typedArray: TypedArray[_, _]) = this()
 
   /** Creates a new Uint8Array with the elements in the given array */
-  def this(array: js.Array[_]) = this()
+  def this(array: js.Iterable[_]) = this()
 
   /** Creates a Uint8Array view on the given ArrayBuffer */
   def this(buffer: ArrayBuffer, byteOffset: Int = 0, length: Int = ???) = this()
@@ -29,4 +31,5 @@ class Uint8Array private extends TypedArray[Short, Uint8Array] {
  *  [[Uint8Array]] companion
  */
 @js.native
+@JSGlobal
 object Uint8Array extends TypedArrayStatic
