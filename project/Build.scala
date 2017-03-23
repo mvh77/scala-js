@@ -32,6 +32,7 @@ import org.scalajs.core.tools.io.MemVirtualJSFile
 import org.scalajs.core.tools.sem._
 import org.scalajs.core.tools.jsdep.ResolvedJSDependency
 import org.scalajs.core.tools.json._
+import org.scalajs.core.tools.linker.ModuleInitializer
 import org.scalajs.core.tools.linker.backend.OutputMode
 
 import sbtassembly.AssemblyPlugin.autoImport._
@@ -55,7 +56,8 @@ object Build {
   val shouldPartest = settingKey[Boolean](
     "Whether we should partest the current scala version (and fail if we can't)")
 
-  val previousVersion = "0.6.14"
+  /* MiMa configuration -- irrelevant while in 1.0.0-SNAPSHOT.
+  val previousVersion = "0.6.15"
   val previousSJSBinaryVersion =
     ScalaJSCrossVersion.binaryScalaJSVersion(previousVersion)
   val previousBinaryCrossVersion =
@@ -65,6 +67,7 @@ object Build {
     Set("2.10.6", "2.11.8", "2.12.1")
   val newScalaBinaryVersionsInThisRelease: Set[String] =
     Set()
+  */
 
   val javaVersion = settingKey[Int](
     "The major Java SDK version that should be assumed for compatibility. " +
@@ -87,6 +90,7 @@ object Build {
 
   val previousArtifactSetting: Setting[_] = {
     mimaPreviousArtifacts ++= {
+      /* MiMa is completely disabled while we are in 1.0.0-SNAPSHOT.
       val scalaV = scalaVersion.value
       val scalaBinaryV = scalaBinaryVersion.value
       if (!scalaVersionsUsedForPublishing.contains(scalaV)) {
@@ -112,6 +116,8 @@ object Build {
             .extra(prevExtraAttributes.toSeq: _*)
         Set(CrossVersion(scalaV, scalaBinaryV)(prevProjectID).cross(CrossVersion.Disabled))
       }
+      */
+      Set.empty
     }
   }
 
@@ -624,9 +630,26 @@ object Build {
           val (jars, dirs) = cp.filter(_.exists).partition(_.isFile)
           val irFiles = dirs.flatMap(dir => (dir ** "*.sjsir").get)
 
-          val irPaths =  {
-            for (f <- jars ++ irFiles)
-              yield s""""${escapeJS(f.getAbsolutePath)}""""
+          def seqOfStringsToJSArrayCode(strings: Seq[String]): String =
+            strings.map(s => "\"" + escapeJS(s) + "\"").mkString("[", ", ", "]")
+
+          val irPaths = {
+            val absolutePaths = (jars ++ irFiles).map(_.getAbsolutePath)
+            seqOfStringsToJSArrayCode(absolutePaths)
+          }
+
+          val mainMethods = {
+            /* Ideally we would read `scalaJSModuleInitializers in (testSuite, Test)`,
+             * but we cannot convert the ModuleInitializers to strings to be
+             * passed to the QuickLinker (because ModuleInitializer is a
+             * write-only data structure). So we have some duplication.
+             */
+            val unescapedMainMethods = List(
+                "org.scalajs.testsuite.compiler.ModuleInitializerInNoConfiguration.main",
+                "org.scalajs.testsuite.compiler.ModuleInitializerInTestConfiguration.main2",
+                "org.scalajs.testsuite.compiler.ModuleInitializerInTestConfiguration.main1"
+            )
+            seqOfStringsToJSArrayCode(unescapedMainMethods)
           }
 
           val scalaJSEnv = {
@@ -640,7 +663,7 @@ object Build {
           val code = {
             s"""
             var linker = scalajs.QuickLinker;
-            var lib = linker.linkTestSuiteNode(${irPaths.mkString(", ")});
+            var lib = linker.linkTestSuiteNode($irPaths, $mainMethods);
 
             var __ScalaJSEnv = $scalaJSEnv;
 
@@ -1105,16 +1128,6 @@ object Build {
           previousArtifactSetting,
           mimaBinaryIssueFilters ++= BinaryIncompatibilities.CLI,
 
-          // TODO Remove this when going towards 0.6.16
-          // Ignore bin compat of cli for 2.12 because it's new in 0.6.15.
-          mimaPreviousArtifacts := {
-            val scalaV = scalaVersion.value
-            if (scalaV.startsWith("2.10.") || scalaV.startsWith("2.11."))
-              mimaPreviousArtifacts.value
-            else
-              Set.empty
-          },
-
           // assembly options
           mainClass in assembly := None, // don't want an executable JAR
           assemblyOption in assembly ~= { _.copy(includeScala = false) },
@@ -1207,7 +1220,7 @@ object Build {
       settings = exampleSettings ++ Seq(
           name := "Hello World - Scala.js example",
           moduleName := "helloworld",
-          persistLauncher := true
+          scalaJSUseMainModuleInitializer := true
       )
   ).withScalaJSCompiler.dependsOn(library)
 
@@ -1501,6 +1514,59 @@ object Build {
           }
 
           sourceFiles1
+        },
+
+        /* Reduce the amount of tests on PhantomJS to avoid a crash.
+         * It seems we reached the limits of what PhantomJS can handle in terms
+         * of code mass. Since PhantomJS support is due to be moved to a
+         * separate repository in 1.0.0, the easiest way to fix this is to
+         * reduce the pressure on PhantomJS. We therefore remove the tests of
+         * java.math (BigInteger and BigDecimal) when running with PhantomJS.
+         * These tests are well isolated, and the less likely to have
+         * environmental differences.
+         *
+         * Note that `jsEnv` is never set from this Build, but it is set via
+         * the command-line in the CI matrix.
+         */
+        sources in Test := {
+          def isPhantomJS(env: JSEnv): Boolean = env match {
+            case _: PhantomJSEnv       => true
+            case env: RetryingComJSEnv => isPhantomJS(env.baseEnv)
+            case _                     => false
+          }
+
+          val sourceFiles = (sources in Test).value
+          if ((jsEnv in Test).?.value.exists(isPhantomJS)) {
+            sourceFiles.filter { f =>
+              !f.getAbsolutePath
+                .replace('\\', '/')
+                .contains("/org/scalajs/testsuite/javalib/math/")
+            }
+          } else {
+            sourceFiles
+          }
+        },
+
+        // Module initializers. Duplicated in toolsJS/test
+        scalaJSModuleInitializers += {
+          ModuleInitializer.mainMethod(
+              "org.scalajs.testsuite.compiler.ModuleInitializerInNoConfiguration",
+              "main")
+        },
+        scalaJSModuleInitializers in Compile += {
+          ModuleInitializer.mainMethod(
+              "org.scalajs.testsuite.compiler.ModuleInitializerInCompileConfiguration",
+              "main")
+        },
+        scalaJSModuleInitializers in Test += {
+          ModuleInitializer.mainMethod(
+              "org.scalajs.testsuite.compiler.ModuleInitializerInTestConfiguration",
+              "main2")
+        },
+        scalaJSModuleInitializers in Test += {
+          ModuleInitializer.mainMethod(
+              "org.scalajs.testsuite.compiler.ModuleInitializerInTestConfiguration",
+              "main1")
         }
       )
   ).withScalaJSCompiler.withScalaJSJUnitPlugin.dependsOn(

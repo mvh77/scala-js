@@ -3,6 +3,8 @@ package org.scalajs.core.compiler.test
 import org.scalajs.core.compiler.test.util._
 import org.junit.Test
 
+import org.junit.Assume._
+
 // scalastyle:off line.size.limit
 
 class JSExportTest extends DirectTest with TestHelpers {
@@ -1139,6 +1141,21 @@ class JSExportTest extends DirectTest with TestHelpers {
   }
 
   @Test
+  def noExportTopLevelLazyVal: Unit = {
+    """
+    object A {
+      @JSExportTopLevel("foo")
+      lazy val a: Int = 1
+    }
+    """ hasErrors
+    """
+      |newSource1.scala:4: error: You may not export a lazy val to the top level
+      |      @JSExportTopLevel("foo")
+      |       ^
+    """
+  }
+
+  @Test
   def noExportTopLevelGetter: Unit = {
     """
     object A {
@@ -1419,6 +1436,27 @@ class JSExportTest extends DirectTest with TestHelpers {
     """
       |newSource1.scala:8: error: Fields (val or var) cannot be exported as static more than once
       |      @JSExportStatic("b")
+      |       ^
+    """
+  }
+
+  @Test
+  def noExportStaticLazyVal: Unit = {
+    // Affected by Scala bug SI-10075
+    assumeTrue(scala.util.Properties.versionNumberString != "2.12.0")
+
+    """
+    @ScalaJSDefined
+    class StaticContainer extends js.Object
+
+    object StaticContainer {
+      @JSExportStatic
+      lazy val a: Int = 1
+    }
+    """ hasErrors
+    """
+      |newSource1.scala:7: error: You may not export a lazy val as static
+      |      @JSExportStatic
       |       ^
     """
   }
